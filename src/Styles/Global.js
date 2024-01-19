@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyles = createGlobalStyle`
@@ -14,7 +13,7 @@ const GlobalStyles = createGlobalStyle`
 }
 
 body{
-   
+
 }
 `;
 
