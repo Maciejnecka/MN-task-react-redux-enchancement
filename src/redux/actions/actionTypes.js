@@ -1,3 +1,4 @@
+// src/redux/actions/actionTypes.js
 export const ADD_CURRENCY = 'ADD_CURRENCY';
 export const UPDATE_CURRENCY = 'UPDATE_CURRENCY';
 export const REMOVE_CURRENCY = 'REMOVE_CURRENCY';

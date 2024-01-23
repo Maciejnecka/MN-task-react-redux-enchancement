@@ -1,5 +1,6 @@
+/* eslint-disable default-param-last */
 /* eslint-disable class-methods-use-this */
-const API_KEY = 'd51f20596cae4c668a010b14cf358256';
+const API_KEY = '05849832bd3c40da9a853aa82e1124fc';
 
 const requestOptions = {
     method: 'GET',
@@ -9,11 +10,27 @@ const requestOptions = {
 class ExchangeRatesAPI {
     url = 'https://openexchangerates.org/api';
 
-    getRates(options, signal) {
-        const { date, symbols } = options;
-        const dateQuery = date || 'latest';
+    getCurrencies(signal) {
+        const endpoint = `${this.url}/currencies.json?app_id=${API_KEY}`;
         const fetchOptions = { ...requestOptions, signal };
-        const endpoint = `${this.url}/historical/${dateQuery}.json?app_id=${API_KEY}&symbols=${symbols}`;
+
+        return fetch(endpoint, fetchOptions)
+            .then(this.handleErrors)
+            .then((resp) => resp.json());
+    }
+
+    getLatestRates(signal) {
+        const endpoint = `${this.url}/latest.json?app_id=${API_KEY}&base=USD`;
+        const fetchOptions = { ...requestOptions, signal };
+
+        return fetch(endpoint, fetchOptions)
+            .then(this.handleErrors)
+            .then((resp) => resp.json());
+    }
+
+    getHistoricalRates(date, signal, baseCurrency = 'USD') {
+        const endpoint = `${this.url}/historical/${date}.json?app_id=${API_KEY}&base=${baseCurrency}`;
+        const fetchOptions = { ...requestOptions, signal };
 
         return fetch(endpoint, fetchOptions)
             .then(this.handleErrors)

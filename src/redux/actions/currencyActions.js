@@ -1,3 +1,4 @@
+// src/redux/actions/currencyActions.js
 import { ADD_CURRENCY, UPDATE_CURRENCY, REMOVE_CURRENCY } from './actionTypes';
 
 export const addCurrency = (currency) => ({ type: ADD_CURRENCY, payload: currency });

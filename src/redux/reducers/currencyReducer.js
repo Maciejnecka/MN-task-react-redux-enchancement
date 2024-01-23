@@ -1,5 +1,6 @@
 /* eslint-disable default-param-last */
 /* eslint-disable indent */
+// src/redux/reducers/currencyReducer.js
 import { ADD_CURRENCY, UPDATE_CURRENCY, REMOVE_CURRENCY } from '../actions/actionTypes';
 
 const initialState = {

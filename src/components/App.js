@@ -4,6 +4,7 @@ import { ThemeProvider } from 'styled-components';
 import GlobalStyles from '../Styles/Global';
 import GlobalFonts from '../Styles/fonts/GlobalFonts';
 import theme from '../Styles/theme';
+import TransactionForm from './TransactionForm/TransactionForm';
 
 const App = function () {
     return (
@@ -11,7 +12,7 @@ const App = function () {
             <GlobalStyles />
             <GlobalFonts />
             <ThemeProvider theme={theme}>
-                <h1>Hello world</h1>
+                <TransactionForm />
             </ThemeProvider>
         </>
     );
