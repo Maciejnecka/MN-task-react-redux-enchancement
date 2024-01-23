@@ -142,12 +142,16 @@ function TransactionForm() {
                     value={selectedCurrency}
                     onChange={(e) => handleCurrencyChange(e.target.value)}
                 >
+                    <option value="" disabled>
+                        Choose currency
+                    </option>
                     {currencies.map((currency) => (
                         <option key={currency} value={currency}>
                             {currency}
                         </option>
                     ))}
                 </select>
+                {formErrors.selectedCurrency && <div className="error-message">{formErrors.selectedCurrency}</div>}
                 <input
                     className="exchange-form__input"
                     type="number"

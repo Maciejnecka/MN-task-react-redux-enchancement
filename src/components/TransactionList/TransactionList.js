@@ -34,9 +34,12 @@ function TransactionList({ transactions, onDelete }) {
         const profitLossAmount = (currentRate - transaction.purchasePrice) * transaction.amount;
         const profitLossPercentage = (profitLossAmount / (transaction.purchasePrice * transaction.amount)) * 100;
 
+        const currentValueUSD = profitLossAmount + transaction.amount;
+
         return {
             amount: profitLossAmount.toFixed(2),
             percentage: profitLossPercentage.toFixed(2),
+            currentValueUSD: currentValueUSD.toFixed(2),
             isZero: profitLossAmount === 0,
         };
     };
@@ -52,22 +55,26 @@ function TransactionList({ transactions, onDelete }) {
                     return (
                         <li key={uuidv4()} className="transaction-list__item">
                             <div className="transaction-list__details">
-                                <span className="transaction-list__amount">Amount: {transaction.amount} $</span>
-                                <span className="transaction-list__date">Date: {transaction.date}</span>
+                                <p className="transaction-list__currency">Currency: {transaction.currency}</p>
+                                <p className="transaction-list__amount">Amount: {transaction.amount} $</p>
+                                <p className="transaction-list__date">Date: {transaction.date}</p>
                             </div>
                             <div className="transaction-list__pricing">
-                                <span className="transaction-list__purchase-price">
-                                    Purchase Price: {transaction.purchasePrice.toFixed(4)}
-                                </span>
-                                <span className="transaction-list__total">
-                                    Total: {transaction.total.toFixed(2)} {transaction.currency}
-                                </span>
+                                <p className="transaction-list__purchase-price">
+                                    Purchase Rate: {transaction.purchasePrice}
+                                </p>
+                                <p className="transaction-list__current-rate">
+                                    Current Rate: {todayRates[transaction.currency]}
+                                </p>
+                                <p className="transaction-list__total">
+                                    Current value: {calculateProfitOrLoss(transaction).currentValueUSD} $
+                                </p>
                             </div>
                             <div className="transaction-list__status-container">
                                 <span className={`${statusClass} transaction-list__status`}>
                                     {amount >= 0
-                                        ? `Profit: ${amount} ${transaction.currency} (+${percentage}%)`
-                                        : `Loss: ${amount} ${transaction.currency} (${percentage}%)`}
+                                        ? `Profit: ${amount} $ (+${percentage}%)`
+                                        : `Loss: ${amount} $ (${percentage}%)`}
                                 </span>
                             </div>
                             <button
@@ -93,6 +100,7 @@ TransactionList.propTypes = {
             date: PropTypes.string.isRequired,
             purchasePrice: PropTypes.number,
             total: PropTypes.number.isRequired,
+            purchaseRate: PropTypes.number,
         }),
     ).isRequired,
     onDelete: PropTypes.func.isRequired,
