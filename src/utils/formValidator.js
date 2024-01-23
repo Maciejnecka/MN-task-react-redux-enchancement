@@ -5,6 +5,11 @@ const formFields = [
         required: true,
     },
     {
+        name: 'amount',
+        label: 'Amount',
+        required: true,
+    },
+    {
         name: 'date',
         label: 'Date',
         required: true,

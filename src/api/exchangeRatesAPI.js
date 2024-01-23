@@ -19,6 +19,15 @@ class ExchangeRatesAPI {
             .then((resp) => resp.json());
     }
 
+    getTodayRate(signal, currency) {
+        const endpoint = `${this.url}/latest.json?app_id=${API_KEY}&base=USD&symbols=${currency}`;
+        const fetchOptions = { ...requestOptions, signal };
+
+        return fetch(endpoint, fetchOptions)
+            .then(this.handleErrors)
+            .then((resp) => resp.json());
+    }
+
     getLatestRates(signal) {
         const endpoint = `${this.url}/latest.json?app_id=${API_KEY}&base=USD`;
         const fetchOptions = { ...requestOptions, signal };

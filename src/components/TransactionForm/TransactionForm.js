@@ -6,7 +6,7 @@ import ExchangeRatesAPI from '../../api/ExchangeRatesAPI';
 import { addCurrency } from '../../redux/actions/currencyActions';
 import exchangeIcon from '../../Styles/icons/exchange.png';
 import StyledTransactionForm from './TransactionForm.styled';
-import TransactionList from '../TransactionList/TransactionList';
+import StyledTransactionList from '../TransactionList';
 import validateFormFields from '../../utils/formValidator';
 
 function TransactionForm() {
@@ -180,7 +180,7 @@ function TransactionForm() {
                     Add Transaction
                 </button>
             </StyledTransactionForm>
-            <TransactionList transactions={transactions} onDelete={handleDeleteTransaction} />
+            <StyledTransactionList transactions={transactions} onDelete={handleDeleteTransaction} />
         </>
     );
 }
