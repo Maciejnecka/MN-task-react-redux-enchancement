@@ -1,8 +1,13 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import ExchangeRatesAPI from '../../api/ExchangeRatesAPI';
 import { addCurrency } from '../../redux/actions/currencyActions';
+import exchangeIcon from '../../Styles/icons/exchange.png';
+import StyledTransactionForm from './TransactionForm.styled';
+import TransactionList from '../TransactionList/TransactionList';
+import validateFormFields from '../../utils/formValidator';
 
 function TransactionForm() {
     const dispatch = useDispatch();
@@ -12,6 +17,8 @@ function TransactionForm() {
     const [date, setDate] = useState('');
     const [purchasePrice, setPurchasePrice] = useState('');
     const [total, setTotal] = useState(0);
+    const [transactions, setTransactions] = useState([]);
+    const [formErrors, setFormErrors] = useState({});
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -71,27 +78,110 @@ function TransactionForm() {
         setPurchasePrice(e.target.value);
     };
 
+    useEffect(() => {
+        const storedTransactions = localStorage.getItem('transactions');
+        if (storedTransactions) {
+            const parsedTransactions = JSON.parse(storedTransactions);
+            setTransactions(parsedTransactions);
+        }
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        const transaction = { currency: selectedCurrency, amount, date, purchasePrice, total };
-        dispatch(addCurrency(transaction));
+
+        const formData = {
+            selectedCurrency,
+            amount,
+            date,
+            purchasePrice,
+        };
+
+        const errors = validateFormFields(formData);
+
+        if (Object.keys(errors).length === 0) {
+            setFormErrors({});
+            const transaction = {
+                currency: selectedCurrency,
+                amount: parseFloat(amount),
+                date,
+                purchasePrice: parseFloat(purchasePrice),
+                total,
+            };
+
+            dispatch(addCurrency(transaction));
+
+            setTransactions((prevTransactions) => [...prevTransactions, transaction]);
+
+            const updatedTransactions = [...transactions, transaction];
+            localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+
+            setSelectedCurrency('');
+            setAmount('');
+            setDate('');
+            setPurchasePrice('');
+            setTotal(0);
+        } else {
+            setFormErrors(errors);
+        }
+    };
+
+    const handleDeleteTransaction = (index) => {
+        const updatedTransactions = [...transactions];
+        updatedTransactions.splice(index, 1);
+
+        setTransactions(updatedTransactions);
+
+        localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <select value={selectedCurrency} onChange={(e) => handleCurrencyChange(e.target.value)}>
-                {currencies.map((currency) => (
-                    <option key={currency} value={currency}>
-                        {currency}
-                    </option>
-                ))}
-            </select>
-            <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
-            <input type="date" value={date} max={today} onChange={(e) => handleDateChange(e.target.value)} />
-            <input type="number" value={purchasePrice} onChange={handlePurchasePriceChange} />
-            <div>Total: {total.toFixed(2)}</div>
-            <button type="submit">Add Transaction</button>
-        </form>
+        <>
+            <StyledTransactionForm onSubmit={handleSubmit}>
+                <select
+                    className="exchange-form__select"
+                    value={selectedCurrency}
+                    onChange={(e) => handleCurrencyChange(e.target.value)}
+                >
+                    {currencies.map((currency) => (
+                        <option key={currency} value={currency}>
+                            {currency}
+                        </option>
+                    ))}
+                </select>
+                <input
+                    className="exchange-form__input"
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                />
+                {formErrors.amount && <div className="error-message">{formErrors.amount}</div>}
+                <input
+                    className="exchange-form__date"
+                    type="date"
+                    value={date}
+                    max={today}
+                    onChange={(e) => handleDateChange(e.target.value)}
+                />
+                {formErrors.date && <div className="error-message">{formErrors.date}</div>}
+                <label className="exchange-form__label" htmlFor="number">
+                    USD <img className="exchange-form__icon" src={exchangeIcon} alt="Exchange" /> {selectedCurrency}
+                    <input
+                        className="exchange-form__input"
+                        type="number"
+                        value={purchasePrice}
+                        onChange={handlePurchasePriceChange}
+                    />
+                    {formErrors.purchasePrice && <div className="error-message">{formErrors.purchasePrice}</div>}
+                </label>
+                <div className="exchange-form__total">
+                    Total: {total.toFixed(2)} {selectedCurrency}
+                </div>
+                <button className="exchange-form__button" type="submit">
+                    Add Transaction
+                </button>
+            </StyledTransactionForm>
+            <TransactionList transactions={transactions} onDelete={handleDeleteTransaction} />
+        </>
     );
 }
 

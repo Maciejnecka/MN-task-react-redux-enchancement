@@ -4,7 +4,7 @@ import { ThemeProvider } from 'styled-components';
 import GlobalStyles from '../Styles/Global';
 import GlobalFonts from '../Styles/fonts/GlobalFonts';
 import theme from '../Styles/theme';
-import TransactionForm from './TransactionForm/TransactionForm';
+import TransactionForm from './TransactionForm';
 
 const App = function () {
     return (
