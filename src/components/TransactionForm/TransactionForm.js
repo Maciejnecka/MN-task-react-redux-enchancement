@@ -1,12 +1,13 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import ExchangeRatesAPI from '../../api/ExchangeRatesAPI';
 import { addCurrency } from '../../redux/actions/currencyActions';
 import exchangeIcon from '../../Styles/icons/exchange.png';
-import StyledTransactionForm from './TransactionForm.styled';
+import addIcon from '../../Styles/icons/add-button.png';
+import { StyledTransactionForm, StyledShowFormButton, StyledTransactionModal } from './TransactionForm.styled';
 import StyledTransactionList from '../TransactionList';
 import validateFormFields from '../../utils/formValidator';
 
@@ -16,12 +17,23 @@ function TransactionForm() {
     const [selectedCurrency, setSelectedCurrency] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState('');
+    const [apiFetchedPrice, setApiFetchedPrice] = useState('');
     const [purchasePrice, setPurchasePrice] = useState('');
     const [total, setTotal] = useState(0);
     const [transactions, setTransactions] = useState([]);
     const [formErrors, setFormErrors] = useState({});
+    const [isFormVisible, setIsFormVisible] = useState(false);
+    const formRef = useRef(null);
 
-    const today = new Date().toISOString().split('T')[0];
+    const toggleFormVisibility = () => {
+        setIsFormVisible(!isFormVisible);
+        setFormErrors({});
+        setSelectedCurrency('');
+        setAmount('');
+        setDate('');
+        setPurchasePrice('');
+        setTotal(0);
+    };
 
     useEffect(() => {
         const abortController = new AbortController();
@@ -43,17 +55,23 @@ function TransactionForm() {
         const api = new ExchangeRatesAPI();
         try {
             const data = await api.getLatestRates(new AbortController().signal, baseCurrency);
-            setPurchasePrice(data.rates[selectedCurrency]);
+            setApiFetchedPrice(data.rates[selectedCurrency]);
         } catch (error) {
             console.error('Error fetching latest rates', error);
         }
     };
 
     useEffect(() => {
+        setPurchasePrice(apiFetchedPrice);
+    }, [apiFetchedPrice]);
+
+    const today = new Date().toISOString().split('T')[0];
+
+    useEffect(() => {
         if (selectedCurrency) {
             fetchRates('USD');
         }
-    }, [selectedCurrency]);
+    }, [selectedCurrency, fetchRates]);
 
     const handleCurrencyChange = (currency) => {
         setSelectedCurrency(currency);
@@ -65,6 +83,7 @@ function TransactionForm() {
 
     const handleDateChange = (selectedDate) => {
         setDate(selectedDate);
+
         if (selectedCurrency) {
             const api = new ExchangeRatesAPI();
             api.getHistoricalRates(selectedDate, new AbortController().signal, 'USD')
@@ -101,6 +120,7 @@ function TransactionForm() {
 
         if (Object.keys(errors).length === 0) {
             setFormErrors({});
+            setIsFormVisible(false);
             const transaction = {
                 id: uuidv4(),
                 currency: selectedCurrency,
@@ -127,6 +147,19 @@ function TransactionForm() {
         }
     };
 
+    const handleClickOutside = (event) => {
+        if (formRef.current && !formRef.current.contains(event.target)) {
+            setIsFormVisible(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const handleDeleteTransaction = (index) => {
         const updatedTransactions = [...transactions];
         updatedTransactions.splice(index, 1);
@@ -138,54 +171,72 @@ function TransactionForm() {
 
     return (
         <>
-            <StyledTransactionForm onSubmit={handleSubmit}>
-                <select
-                    className="exchange-form__select"
-                    value={selectedCurrency}
-                    onChange={(e) => handleCurrencyChange(e.target.value)}
-                >
-                    <option value="" disabled>
-                        Choose currency
-                    </option>
-                    {currencies.map((currency) => (
-                        <option key={currency} value={currency}>
-                            {currency}
-                        </option>
-                    ))}
-                </select>
-                {formErrors.selectedCurrency && <div className="error-message">{formErrors.selectedCurrency}</div>}
-                <input
-                    className="exchange-form__input"
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                />
-                {formErrors.amount && <div className="error-message">{formErrors.amount}</div>}
-                <input
-                    className="exchange-form__date"
-                    type="date"
-                    value={date}
-                    max={today}
-                    onChange={(e) => handleDateChange(e.target.value)}
-                />
-                {formErrors.date && <div className="error-message">{formErrors.date}</div>}
-                <label className="exchange-form__label" htmlFor="number">
-                    USD <img className="exchange-form__icon" src={exchangeIcon} alt="Exchange" /> {selectedCurrency}
-                    <input
-                        className="exchange-form__input"
-                        type="number"
-                        value={purchasePrice}
-                        onChange={handlePurchasePriceChange}
-                    />
-                    {formErrors.purchasePrice && <div className="error-message">{formErrors.purchasePrice}</div>}
-                </label>
-                <div className="exchange-form__total">
-                    Total: {total.toFixed(2)} {selectedCurrency}
-                </div>
-                <button className="exchange-form__button" type="submit">
-                    Add Transaction
+            <StyledShowFormButton>
+                <button type="button" className="exchange-form__show-form-button" onClick={toggleFormVisibility}>
+                    <img className="exchange-form__show-form--icon" src={addIcon} alt="Exchange" /> Add transaction
                 </button>
-            </StyledTransactionForm>
+            </StyledShowFormButton>
+            {isFormVisible && (
+                <StyledTransactionModal className={`exchange-form__transaction-modal ${isFormVisible ? 'active' : ''}`}>
+                    <StyledTransactionForm ref={formRef} onSubmit={handleSubmit}>
+                        <select
+                            className="exchange-form__select"
+                            value={selectedCurrency}
+                            onChange={(e) => handleCurrencyChange(e.target.value)}
+                        >
+                            <option value="" disabled>
+                                Choose currency
+                            </option>
+                            {currencies.map((currency) => (
+                                <option key={currency} value={currency}>
+                                    {currency}
+                                </option>
+                            ))}
+                        </select>
+                        {formErrors.selectedCurrency && (
+                            <div className="exchange-form__error-message">{formErrors.selectedCurrency}</div>
+                        )}
+                        <input
+                            placeholder="Amount of currency"
+                            className="exchange-form__input"
+                            type="number"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                        />
+                        {formErrors.amount && <div className="exchange-form__error-message">{formErrors.amount}</div>}
+                        <input
+                            className="exchange-form__date"
+                            type="date"
+                            value={date}
+                            max={today}
+                            onChange={(e) => handleDateChange(e.target.value)}
+                        />
+                        {formErrors.date && <div className="exchange-form__error-message">{formErrors.date}</div>}
+                        <label className="exchange-form__label" htmlFor="purchasePrice">
+                            USD <img className="exchange-form__icon" src={exchangeIcon} alt="Exchange" />{' '}
+                            {selectedCurrency}
+                            <input
+                                className="exchange-form__input--price"
+                                type="number"
+                                value={purchasePrice}
+                                onChange={handlePurchasePriceChange}
+                            />
+                        </label>
+                        {formErrors.purchasePrice && (
+                            <div className="exchange-form__error-message">{formErrors.purchasePrice}</div>
+                        )}
+                        <div className="exchange-form__total">
+                            Total: {total.toFixed(2)} {selectedCurrency}
+                        </div>
+                        <button className="exchange-form__button" type="submit">
+                            Add
+                        </button>
+                        <button type="button" className="exchange-form__close-button" onClick={toggleFormVisibility}>
+                            Close window
+                        </button>
+                    </StyledTransactionForm>
+                </StyledTransactionModal>
+            )}
             <StyledTransactionList transactions={transactions} onDelete={handleDeleteTransaction} />
         </>
     );

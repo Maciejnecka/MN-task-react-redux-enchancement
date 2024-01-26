@@ -8,6 +8,7 @@ const formFields = [
         name: 'amount',
         label: 'Amount',
         required: true,
+        validate: (value) => parseFloat(value) > 0,
     },
     {
         name: 'date',
@@ -32,6 +33,9 @@ function validateFormFields(formData) {
 
         if (field.pattern && !field.pattern.test(formData[field.name])) {
             errors[field.name] = `Invalid ${field.label}`;
+        }
+        if (field.validate && !field.validate(formData[field.name])) {
+            errors[field.name] = `${field.label} must be greater than 0`;
         }
     });
 
