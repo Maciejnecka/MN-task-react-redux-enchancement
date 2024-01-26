@@ -1,6 +1,6 @@
 /* eslint-disable default-param-last */
 /* eslint-disable class-methods-use-this */
-const API_KEY = '05849832bd3c40da9a853aa82e1124fc';
+import API_KEY from '../../secretKey';
 
 const requestOptions = {
     method: 'GET',
