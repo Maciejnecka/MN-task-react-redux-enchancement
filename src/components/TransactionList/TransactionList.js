@@ -28,8 +28,19 @@ function TransactionList({ transactions, onDelete }) {
     }, [transactions]);
 
     return (
-        <StyledTransactionList className="transaction-list">
+        <StyledTransactionList>
             <h2 className="transaction-list__title">Transaction List</h2>
+            <ul className="transaction-list__header-container">
+                <li className="transaction-list__header">
+                    <span>Currency</span>
+                    <span>Amount</span>
+                    <span>Purchase price</span>
+                    <span>Current price</span>
+                    <span>Total</span>
+                    <span>Loss or Profit</span>
+                    <span>Action</span>
+                </li>
+            </ul>
             <ul className="transaction-list__items">
                 {transactions.map((transaction, index) => (
                     <StyledTransactionItem

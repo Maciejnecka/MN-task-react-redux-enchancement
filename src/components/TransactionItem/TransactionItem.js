@@ -30,31 +30,24 @@ function TransactionItem({ transaction, onDelete, todayRates }) {
     let statusClass;
 
     if (isZero) {
-        statusText = 'No Profit or Loss';
+        statusText = 'No changes';
         statusClass = 'transaction-list__status--neutral';
     } else if (amount >= 0) {
-        statusText = `Profit: ${amount} $ (+${percentage}%)`;
+        statusText = `+${amount} $ (+${percentage}%)`;
         statusClass = 'transaction-list__status--profit';
     } else {
-        statusText = `Loss: ${amount} $ (${percentage}%)`;
+        statusText = `${amount} $ (${percentage}%)`;
         statusClass = 'transaction-list__status--loss';
     }
 
     return (
         <StyledTransactionItem>
-            <div className="transaction-list__details">
-                <p className="transaction-list__currency">Currency: {transaction.currency}</p>
-                <p className="transaction-list__amount">Amount: {transaction.amount} $</p>
-                <p className="transaction-list__date">Date: {transaction.date}</p>
-            </div>
-            <div className="transaction-list__pricing">
-                <p className="transaction-list__purchase-price">Purchase Rate: {transaction.purchasePrice}</p>
-                <p className="transaction-list__current-rate">Current Rate: {todayRates[transaction.currency]}</p>
-                <p className="transaction-list__total">Current value: {currentValueUSD} $</p>
-            </div>
-            <div className="transaction-list__status-container">
-                <span className={`${statusClass} transaction-list__status`}>{statusText}</span>
-            </div>
+            <span className="transaction-list__currency">{transaction.currency}</span>
+            <span className="transaction-list__amount">{transaction.amount} $</span>
+            <span className="transaction-list__purchase-price">{transaction.purchasePrice.toFixed(3)}</span>
+            <span className="transaction-list__current-rate">{todayRates[transaction.currency]?.toFixed(3)}</span>
+            <span className="transaction-list__total">{currentValueUSD} $</span>
+            <span className={`${statusClass} transaction-list__status`}>{statusText}</span>
             <button type="button" onClick={() => onDelete(transaction.id)} className="transaction-list__delete-btn">
                 Delete
             </button>
