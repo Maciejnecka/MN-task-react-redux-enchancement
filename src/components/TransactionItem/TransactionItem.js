@@ -1,9 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import StyledTransactionItem from './TransactionItem.styled';
+import { StyledTransactionItem, StyledConfirmationDialog } from './TransactionItem.styled';
 
 function TransactionItem({ transaction, onDelete, todayRates }) {
+    const [showConfirmation, setShowConfirmation] = useState(false);
+
     const calculateProfitOrLoss = (transactions) => {
         const currentRate = todayRates[transaction.currency];
         if (!currentRate) {
@@ -40,18 +42,47 @@ function TransactionItem({ transaction, onDelete, todayRates }) {
         statusClass = 'transaction-list__status--loss';
     }
 
+    const toggleConfirmation = () => {
+        setShowConfirmation(!showConfirmation);
+    };
+
     return (
-        <StyledTransactionItem>
-            <span className="transaction-list__currency">{transaction.currency}</span>
-            <span className="transaction-list__amount">{transaction.amount} $</span>
-            <span className="transaction-list__purchase-price">{transaction.purchasePrice.toFixed(3)}</span>
-            <span className="transaction-list__current-rate">{todayRates[transaction.currency]?.toFixed(3)}</span>
-            <span className="transaction-list__total">{currentValueUSD} $</span>
-            <span className={`${statusClass} transaction-list__status`}>{statusText}</span>
-            <button type="button" onClick={() => onDelete(transaction.id)} className="transaction-list__delete-btn">
-                Delete
-            </button>
-        </StyledTransactionItem>
+        <>
+            {showConfirmation && (
+                <StyledConfirmationDialog>
+                    <p className="transaction-list__delete-btn--question">
+                        Are you sure you want to delete this position?
+                    </p>
+                    <div>
+                        <button
+                            type="button"
+                            className="transaction-list__delete-btn--confirm"
+                            onClick={() => onDelete(transaction.id)}
+                        >
+                            Yes
+                        </button>
+                        <button
+                            type="button"
+                            className="transaction-list__delete-btn--reject"
+                            onClick={toggleConfirmation}
+                        >
+                            No
+                        </button>
+                    </div>
+                </StyledConfirmationDialog>
+            )}
+            <StyledTransactionItem>
+                <span className="transaction-list__currency">{transaction.currency}</span>
+                <span className="transaction-list__amount">{transaction.amount} $</span>
+                <span className="transaction-list__purchase-price">{transaction.purchasePrice.toFixed(3)}</span>
+                <span className="transaction-list__current-rate">{todayRates[transaction.currency]?.toFixed(3)}</span>
+                <span className="transaction-list__total">{currentValueUSD} $</span>
+                <span className={`${statusClass} transaction-list__status`}>{statusText}</span>
+                <button type="button" onClick={toggleConfirmation} className="transaction-list__delete-btn">
+                    Delete
+                </button>
+            </StyledTransactionItem>
+        </>
     );
 }
 
