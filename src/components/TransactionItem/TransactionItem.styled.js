@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import media from '../../Styles/mediaQueries';
 
 const StyledTransactionItem = styled.li`
     display: grid;
@@ -6,7 +7,8 @@ const StyledTransactionItem = styled.li`
     align-items: center;
     border-bottom: 1px solid #ccc;
     padding: 0 10px;
-    height: 80px;
+    height: min-content;
+    min-height: 100px;
     border-radius: 5px;
 
     & > span,
@@ -46,12 +48,33 @@ const StyledTransactionItem = styled.li`
         padding: 5px 10px;
         cursor: pointer;
         transition: background-color 0.3s;
-        font-size: 1.5vw;
+        font-size: 1.75rem;
 
         &:hover {
             background-color: #d32f2f;
         }
     }
+
+    ${media.large`
+        .transaction-list__delete-btn {
+        font-size: 1.15rem;
+        }
+       
+    `}
+    ${media.medium`
+         min-height: 0;
+         height: 75px;
+        .transaction-list__delete-btn {
+        font-size: 0.9rem;
+        }
+    `}
+    ${media.small`
+         min-height: 0;
+         height: 60px;
+       .transaction-list__delete-btn {
+        font-size: 0.7rem;
+        }
+    `}
 `;
 
 export default StyledTransactionItem;
