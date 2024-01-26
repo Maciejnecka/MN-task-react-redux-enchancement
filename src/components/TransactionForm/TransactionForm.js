@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
 import ExchangeRatesAPI from '../../api/ExchangeRatesAPI';
 import { addCurrency } from '../../redux/actions/currencyActions';
 import exchangeIcon from '../../Styles/icons/exchange.png';
@@ -101,6 +102,7 @@ function TransactionForm() {
         if (Object.keys(errors).length === 0) {
             setFormErrors({});
             const transaction = {
+                id: uuidv4(),
                 currency: selectedCurrency,
                 amount: parseFloat(amount),
                 date,
