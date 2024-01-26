@@ -6,7 +6,7 @@ const StyledTransactionList = styled.div`
     width: 85%;
     margin: 0 auto;
     display: block;
-    overflow-x: auto;
+    overflow-x: hidden;
     border-bottom: 20px solid #2193b0;
     border-radius: 5px;
 
