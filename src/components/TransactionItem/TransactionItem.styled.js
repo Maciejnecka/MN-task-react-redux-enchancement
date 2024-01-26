@@ -107,6 +107,7 @@ export const StyledConfirmationDialog = styled.div`
         margin: 0 auto;
         text-align: center;
         background-color: #e8eff4;
+        font-weight: bold;
     }
     .transaction-list__delete-btn--confirm {
         background-color: #4caf50;
