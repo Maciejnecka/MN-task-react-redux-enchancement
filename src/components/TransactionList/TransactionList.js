@@ -29,18 +29,20 @@ function TransactionList({ transactions, onDelete }) {
 
     const calculateProfitOrLoss = (transaction) => {
         const currentRate = todayRates[transaction.currency];
-        if (!currentRate) return { amount: 'N/A', percentage: 'N/A' };
+        if (!currentRate) return { amount: 'N/A', percentage: 'N/A', currentValueUSD: 'N/A' };
 
-        const profitLossAmount = (currentRate - transaction.purchasePrice) * transaction.amount;
-        const profitLossPercentage = (profitLossAmount / (transaction.purchasePrice * transaction.amount)) * 100;
-
-        const currentValueUSD = profitLossAmount + transaction.amount;
+        const initialValuePLN = transaction.purchasePrice * transaction.amount;
+        const currentValuePLN = currentRate * transaction.amount;
+        const profitLossPLN = currentValuePLN - initialValuePLN;
+        const profitLossUSD = profitLossPLN / currentRate;
+        const currentValueUSD = transaction.amount + profitLossUSD;
+        const profitLossPercentage = (profitLossUSD / transaction.amount) * 100;
 
         return {
-            amount: profitLossAmount.toFixed(2),
+            amount: profitLossUSD.toFixed(2),
             percentage: profitLossPercentage.toFixed(2),
             currentValueUSD: currentValueUSD.toFixed(2),
-            isZero: profitLossAmount === 0,
+            isZero: profitLossUSD === 0,
         };
     };
 
@@ -49,9 +51,20 @@ function TransactionList({ transactions, onDelete }) {
             <h2 className="transaction-list__title">Transaction List</h2>
             <ul className="transaction-list__items">
                 {transactions.map((transaction, index) => {
-                    const { amount, percentage } = calculateProfitOrLoss(transaction);
-                    const statusClass =
-                        amount >= 0 ? 'transaction-list__status--profit' : 'transaction-list__status--loss';
+                    const { amount, percentage, isZero } = calculateProfitOrLoss(transaction);
+                    let statusText;
+                    let statusClass;
+
+                    if (isZero) {
+                        statusText = 'No Profit or Loss';
+                        statusClass = 'transaction-list__status--neutral';
+                    } else if (amount >= 0) {
+                        statusText = `Profit: ${amount} $ (+${percentage}%)`;
+                        statusClass = 'transaction-list__status--profit';
+                    } else {
+                        statusText = `Loss: ${amount} $ (${percentage}%)`;
+                        statusClass = 'transaction-list__status--loss';
+                    }
                     return (
                         <li key={uuidv4()} className="transaction-list__item">
                             <div className="transaction-list__details">
@@ -71,11 +84,7 @@ function TransactionList({ transactions, onDelete }) {
                                 </p>
                             </div>
                             <div className="transaction-list__status-container">
-                                <span className={`${statusClass} transaction-list__status`}>
-                                    {amount >= 0
-                                        ? `Profit: ${amount} $ (+${percentage}%)`
-                                        : `Loss: ${amount} $ (${percentage}%)`}
-                                </span>
+                                <span className={`${statusClass} transaction-list__status`}>{statusText}</span>
                             </div>
                             <button
                                 type="button"
