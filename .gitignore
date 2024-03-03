@@ -2,3 +2,7 @@ node_modules/
 build/
 package-lock.json
 secretKey.js
+
+useFormState.js
+useTransactions.js
+useExchangeRates.js

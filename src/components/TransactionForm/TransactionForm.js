@@ -10,6 +10,7 @@ import addIcon from '../../Styles/icons/add-button.png';
 import { StyledTransactionForm, StyledShowFormButton, StyledTransactionModal } from './TransactionForm.styled';
 import StyledTransactionList from '../TransactionList';
 import validateFormFields from '../../utils/formValidator';
+import { useFormVisibility } from '../../hooks';
 
 function TransactionForm() {
     const dispatch = useDispatch();
@@ -22,18 +23,8 @@ function TransactionForm() {
     const [total, setTotal] = useState(0);
     const [transactions, setTransactions] = useState([]);
     const [formErrors, setFormErrors] = useState({});
-    const [isFormVisible, setIsFormVisible] = useState(false);
+    const { isVisible, toggleVisibility } = useFormVisibility();
     const formRef = useRef(null);
-
-    const toggleFormVisibility = () => {
-        setIsFormVisible(!isFormVisible);
-        setFormErrors({});
-        setSelectedCurrency('');
-        setAmount('');
-        setDate('');
-        setPurchasePrice('');
-        setTotal(0);
-    };
 
     useEffect(() => {
         const abortController = new AbortController();
@@ -120,7 +111,7 @@ function TransactionForm() {
 
         if (Object.keys(errors).length === 0) {
             setFormErrors({});
-            setIsFormVisible(false);
+
             const transaction = {
                 id: uuidv4(),
                 currency: selectedCurrency,
@@ -137,6 +128,10 @@ function TransactionForm() {
             const updatedTransactions = [...transactions, transaction];
             localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
 
+            if (isVisible) {
+                toggleVisibility();
+            }
+
             setSelectedCurrency('');
             setAmount('');
             setDate('');
@@ -148,8 +143,8 @@ function TransactionForm() {
     };
 
     const handleClickOutside = (event) => {
-        if (formRef.current && !formRef.current.contains(event.target)) {
-            setIsFormVisible(false);
+        if (formRef.current && !formRef.current.contains(event.target) && isVisible) {
+            toggleVisibility();
         }
     };
 
@@ -158,7 +153,7 @@ function TransactionForm() {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
+    }, [isVisible]);
 
     const handleDeleteTransaction = (index) => {
         const updatedTransactions = [...transactions];
@@ -172,12 +167,12 @@ function TransactionForm() {
     return (
         <>
             <StyledShowFormButton>
-                <button type="button" className="exchange-form__show-form-button" onClick={toggleFormVisibility}>
+                <button type="button" className="exchange-form__show-form-button" onClick={toggleVisibility}>
                     <img className="exchange-form__show-form--icon" src={addIcon} alt="Exchange" /> Add transaction
                 </button>
             </StyledShowFormButton>
-            {isFormVisible && (
-                <StyledTransactionModal className={`exchange-form__transaction-modal ${isFormVisible ? 'active' : ''}`}>
+            {isVisible && (
+                <StyledTransactionModal className={`exchange-form__transaction-modal ${isVisible ? 'active' : ''}`}>
                     <StyledTransactionForm ref={formRef} onSubmit={handleSubmit}>
                         <select
                             className="exchange-form__select"
@@ -231,7 +226,7 @@ function TransactionForm() {
                         <button className="exchange-form__button" type="submit">
                             Add
                         </button>
-                        <button type="button" className="exchange-form__close-button" onClick={toggleFormVisibility}>
+                        <button type="button" className="exchange-form__close-button" onClick={toggleVisibility}>
                             Close window
                         </button>
                     </StyledTransactionForm>
